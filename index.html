@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Ladder Across the Land</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Frank+Ruhl+Libre:wght@400;500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* One visual world: the night of Jacob's dream. Sticky map/diagram on one side, the story scrolls beside it. */
+:root{
+  --night:#0b1024;
+  --panel:#10172f;
+  --sea:#0a1630;
+  --land:#1c2440;
+  --hill:#252f52;
+  --coast:#4d5a85;
+  --gold:#e9b65a;
+  --gold-soft:rgba(233,182,90,.18);
+  --ember:#f08a5d;
+  --sky:#8fb4ff;
+  --text:#ece6d6;
+  --muted:#9ba3bf;
+  --rule:rgba(236,230,214,.12);
+  --display:"Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body:"Source Serif 4", Georgia, serif;
+  --hebrew:"Frank Ruhl Libre", "David", "Times New Roman", serif;
+  --ui:"Source Sans 3", system-ui, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:var(--text)}
+body{font-family:var(--body);font-size:18px;line-height:1.62;-webkit-font-smoothing:antialiased}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+a{color:var(--gold);text-decoration-thickness:1px;text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
+
+header.hero{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:72px 24px 40px;display:grid;gap:14px}
+.hero .he{font-family:var(--hebrew);font-size:clamp(26px,3.4vw,38px);color:var(--gold);direction:rtl;text-align:right;font-weight:500;letter-spacing:.01em}
+.hero h1{font-family:var(--display);font-weight:600;font-size:clamp(44px,7vw,88px);line-height:1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.hero p.lede{max-width:62ch;margin:6px 0 0;color:var(--muted);font-size:19px}
+.hero .meta{font-family:var(--ui);font-size:13px;color:var(--muted);letter-spacing:.04em;display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:14px;margin-top:10px}
+.hero .meta span b{color:var(--text);font-weight:600}
+
+.scrolly{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 24px 120px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:48px}
+.story{padding-top:8vh}
+.figure{position:sticky;top:0;height:100vh;height:100dvh;padding:28px 0;display:flex;flex-direction:column;gap:10px}
+.frame{position:relative;flex:1;border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--sea);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.frame svg{position:absolute;inset:0;width:100%;height:100%;display:block;transition:opacity .9s ease}
+#profile{opacity:0;background:radial-gradient(120% 90% at 60% 0%,#1b2552 0%,#0d1430 55%,#0a0f22 100%)}
+.frame[data-mode="profile"] #profile{opacity:1}
+.frame[data-mode="profile"] #map{opacity:0}
+.caption{font-family:var(--ui);font-size:13.5px;color:var(--muted);min-height:2.6em;display:flex;gap:10px;align-items:baseline}
+.caption .tag{font-weight:600;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-size:11.5px;white-space:nowrap}
+
+.part{font-family:var(--ui);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:12vh 0 0;display:flex;align-items:center;gap:12px}
+.part::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold-soft),transparent)}
+.part:first-child{margin-top:0}
+
+.step{min-height:78vh;padding:34px 0;display:flex;flex-direction:column;justify-content:center;gap:14px;opacity:.38;transition:opacity .6s}
+.step.active{opacity:1}
+.step h2{font-family:var(--display);font-weight:600;font-size:clamp(30px,3.2vw,40px);line-height:1.08;margin:0;text-wrap:balance}
+.step .num{font-family:var(--ui);font-size:12px;color:var(--muted);letter-spacing:.12em;font-variant-numeric:tabular-nums}
+.step p{margin:0;max-width:62ch}
+blockquote{margin:4px 0;padding:14px 18px;border-inline-start:2px solid var(--gold);background:linear-gradient(90deg,rgba(233,182,90,.08),rgba(233,182,90,0));border-radius:0 4px 4px 0;max-width:62ch}
+blockquote .he{font-family:var(--hebrew);direction:rtl;text-align:right;font-size:21px;line-height:1.6;display:block;color:#f4ecd8}
+blockquote cite{display:block;font-family:var(--ui);font-style:normal;font-size:12.5px;color:var(--muted);margin-top:6px;letter-spacing:.03em}
+blockquote cite a{color:var(--muted)}
+blockquote cite a:hover{color:var(--gold)}
+
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:62ch}
+.stat{border:1px solid var(--rule);border-radius:4px;padding:10px 12px;background:rgba(16,23,47,.6)}
+.stat b{display:block;font-family:var(--display);font-size:30px;line-height:1.1;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600}
+.stat span{font-family:var(--ui);font-size:12.5px;color:var(--muted);line-height:1.35;display:block}
+
+table.parallels{border-collapse:collapse;max-width:62ch;width:100%;font-size:16px}
+table.parallels th{font-family:var(--ui);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--rule)}
+table.parallels td{padding:9px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+table.parallels td:first-child{color:var(--text)}
+table.parallels td:last-child{color:var(--gold)}
+table.parallels .he{font-family:var(--hebrew);display:block;font-size:15px;color:var(--muted)}
+
+footer{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:40px 24px 80px;border-top:1px solid var(--rule);font-family:var(--ui);font-size:13.5px;color:var(--muted);display:grid;gap:8px}
+footer .closing{font-family:var(--hebrew);font-size:28px;color:var(--gold);direction:rtl;text-align:center;padding:24px 0 30px}
+
+/* ---------- map styling ---------- */
+#map{--k:1}
+#map .sea{fill:var(--sea)}
+#map .land{fill:var(--land);stroke:var(--coast);stroke-width:calc(1px*var(--k));stroke-linejoin:round}
+#map .hills{fill:var(--hill);opacity:.9}
+#map .lake{fill:#13305a;stroke:var(--coast);stroke-width:calc(.8px*var(--k))}
+#map .river{fill:none;stroke:#2c4f86;stroke-width:calc(1.4px*var(--k));stroke-linecap:round}
+#map .graticule{fill:none;stroke:rgba(143,180,255,.06);stroke-width:calc(1px*var(--k))}
+#map .water-label{font-family:var(--display);font-style:italic;fill:#5f78ad;font-size:calc(14px*var(--k));letter-spacing:.12em}
+#map text.lbl{font-family:var(--ui);font-size:calc(12.5px*var(--k));fill:var(--text);paint-order:stroke;stroke:var(--sea);stroke-width:calc(3.5px*var(--k));stroke-linejoin:round;font-weight:600}
+#map text.lbl .he{font-family:var(--hebrew);font-weight:500;fill:var(--muted)}
+#map text.note{font-family:var(--ui);font-size:calc(11.5px*var(--k));fill:var(--gold);paint-order:stroke;stroke:var(--sea);stroke-width:calc(3.5px*var(--k));font-style:italic}
+#map .dot{fill:var(--text)}
+#map .dot.key{fill:var(--gold)}
+#map .halo{fill:var(--gold);opacity:.18}
+#map .route{fill:none;stroke:var(--gold);stroke-width:calc(2.4px*var(--k));stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 2.2s ease,opacity .8s}
+#map .route.on{stroke-dashoffset:0}
+#map .route.alt{stroke:var(--sky)}
+#map .route.dim.on{opacity:.3}
+#map .route-glow{fill:none;stroke:var(--gold);stroke-width:calc(9px*var(--k));opacity:0;stroke-linecap:round;filter:blur(2px)}
+#map .tribe{fill:none;stroke:var(--sky);stroke-width:calc(1.4px*var(--k));stroke-dasharray:calc(5px*var(--k)) calc(4px*var(--k))}
+#map text.tribe-lbl{font-family:var(--display);font-size:calc(17px*var(--k));fill:var(--sky);font-style:italic;letter-spacing:.06em;paint-order:stroke;stroke:var(--land);stroke-width:calc(3px*var(--k))}
+#map .eretz{fill:var(--gold);fill-opacity:.16;stroke:var(--gold);stroke-width:calc(1.4px*var(--k))}
+#map .bracket{fill:none;stroke:var(--gold);stroke-width:calc(1.4px*var(--k));stroke-dasharray:calc(3px*var(--k)) calc(3px*var(--k))}
+#map .uncertain{fill:var(--gold);fill-opacity:.08;stroke:var(--gold);stroke-width:calc(1px*var(--k));stroke-dasharray:calc(3px*var(--k)) calc(3px*var(--k))}
+#map .moriah{fill:var(--gold);stroke:#fff3d6;stroke-width:calc(1px*var(--k))}
+[data-steps]{opacity:0;transition:opacity .8s ease;pointer-events:none}
+[data-steps].on{opacity:1}
+
+/* ---------- profile styling ---------- */
+#profile text{font-family:var(--ui);fill:var(--text)}
+#profile .ground{stroke:#56618c;stroke-width:1.5}
+#profile .terrain{fill:#151d3b}
+#profile .rail{stroke:#d9c08a;stroke-width:2.2;stroke-linecap:round}
+#profile .rung{stroke:#b89a63;stroke-width:1.6;stroke-linecap:round}
+#profile .plabel{font-size:14px;font-weight:600}
+#profile .plabel-he{font-family:var(--hebrew);font-size:15px;fill:var(--muted)}
+#profile .anno{font-size:13px;fill:var(--gold);font-style:italic}
+#profile .lead{stroke:var(--gold);stroke-width:1;stroke-dasharray:3 3;fill:none}
+#profile .jacob{fill:#c9b48a}
+#profile .heart{fill:var(--ember)}
+#profile .angel{fill:#fff6dc}
+#profile .p-dim{opacity:.25}
+
+@media (max-width:900px){
+  body{font-size:17px}
+  .scrolly{grid-template-columns:1fr;gap:0;padding:0 16px 80px}
+  .figure{order:-1;height:52vh;height:52dvh;top:0;padding:10px 0 8px;background:var(--night);z-index:3}
+  .caption{font-size:12.5px;min-height:0}
+  .story{padding-top:0}
+  .step{min-height:auto;padding:12vh 0 8vh;opacity:1}
+  .part{margin-top:6vh}
+  header.hero{padding:44px 16px 24px}
+  .stats{grid-template-columns:1fr 1fr 1fr}
+  .stat b{font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<header class="hero">
+  <div class="he">וְהִנֵּה סֻלָּם מֻצָּב אַרְצָה וְרֹאשׁוֹ מַגִּיעַ הַשָּׁמָיְמָה</div>
+  <h1>A Ladder Across the Land</h1>
+  <p class="lede">Jacob, Beit El, Jerusalem and Shiloh. A geographic reading of Parashat Vayetze that follows Rashi and the midrash, and asks where the house of God really stood.</p>
+  <div class="meta">
+    <span><b>3</b> parts · <b>13</b> scenes</span>
+    <span>Be'er Sheva · Ebla · Beit El · Jerusalem · Shiloh · Haran</span>
+    <span>Scroll to follow the map</span>
+  </div>
+</header>
+
+<div class="scrolly">
+  <div class="story" id="story">
+
+    <div class="part">Prologue</div>
+
+    <section class="step" data-step="intro" data-caption="Beit El sits about 17 km north of Jerusalem.">
+      <span class="num">01</span>
+      <h2>Jeroboam's question</h2>
+      <p>At the opening of the parasha Jacob discovers the place of the Shekhinah at Beit El. He names it the house of God and the gate of heaven, and vows to build there on the stone he set up as a pillar. Later, in Laban's house, God appears to him as "the God of Beit El".</p>
+      <blockquote><span class="he">מַה נּוֹרָא הַמָּקוֹם הַזֶּה, אֵין זֶה כִּי אִם בֵּית אֱ-לֹהִים וְזֶה שַׁעַר הַשָּׁמָיִם</span><cite><a href="https://www.sefaria.org/Genesis.28.17" target="_blank" rel="noopener">Genesis 28:17</a></cite></blockquote>
+      <p>Read plainly, this hands Jeroboam son of Nevat his argument when the kingdom splits. The proper sanctuary is not David and Solomon's Jerusalem but Jacob's Beit El. Return to the source. The foreign altars Solomon's wives built in Jerusalem only strengthen the case.</p>
+      <blockquote><span class="he">וַיָּשֶׂם אֶת הָאֶחָד בְּבֵית אֵל</span><cite><a href="https://www.sefaria.org/I_Kings.12.29" target="_blank" rel="noopener">I Kings 12:29</a></cite></blockquote>
+      <p>Chazal and Rashi seem to have felt the same pressure. Their readings carry Jerusalem to Beit El.</p>
+    </section>
+
+    <section class="step" data-step="fold" data-caption="Rashi: the whole Land of Israel folded beneath Jacob as he lay at Beit El.">
+      <span class="num">02</span>
+      <h2>The whole land, folded under him</h2>
+      <p>Rashi reads Jacob's encounter in two verses. Jacob lay at Beit El, yet the entire land lay beneath him, Jerusalem and Mount Moriah included. And "the place" he came upon is the place named elsewhere: Mount Moriah, which Abraham saw from afar.</p>
+      <blockquote><span class="he">קיפל הקב"ה כל ארץ ישראל תחתיו, רמז לו שתהא נוחה ליכבש לבניו</span><cite><a href="https://www.sefaria.org/Rashi_on_Genesis.28.13" target="_blank" rel="noopener">Rashi on Genesis 28:13</a></cite></blockquote>
+      <blockquote><span class="he">ויפגע במקום — לא הזכיר הכתוב באיזה מקום, אלא במקום הנזכר במקום אחר, הוא הר המוריה</span><cite><a href="https://www.sefaria.org/Rashi_on_Genesis.28.11" target="_blank" rel="noopener">Rashi on Genesis 28:11</a></cite></blockquote>
+    </section>
+
+    <div class="part">Part I · The journey</div>
+
+    <section class="step" data-step="flight" data-caption="Fleeing Esau: Be'er Sheva to Ebla, passing Mount Moriah without stopping.">
+      <span class="num">03</span>
+      <h2>Flight north, past Moriah</h2>
+      <p>Working through Jacob's chronology, Rashi concludes that after taking the blessing Jacob hid for fourteen years in the study house of Shem and Ever. Following Rav Yoel Bin-Nun, the author locates that study house at <b>Ebla</b> (Tell Mardikh) in northern Syria.</p>
+      <p>Fleeing Esau in haste, Jacob had no time to stop and pray on Mount Moriah. He passed it by.</p>
+    </section>
+
+    <section class="step" data-step="sleepless" data-caption="Ebla, northern Syria: fourteen years in the study house of Shem and Ever.">
+      <span class="num">04</span>
+      <h2>Fourteen years without lying down</h2>
+      <blockquote><span class="he">וישכב במקום ההוא — לשון מיעוט, באותו מקום שכב, אבל ארבע עשרה שנים ששימש בבית עבר לא שכב בלילה, שהיה עוסק בתורה</span><cite><a href="https://www.sefaria.org/Rashi_on_Genesis.28.11" target="_blank" rel="noopener">Rashi on Genesis 28:11</a></cite></blockquote>
+      <p>The author reads this as a vow more than as unusual diligence. David swore he would not lie down until he found a resting place for the Shekhinah, and he dozed standing "like a horse" until midnight. Jacob, too, did not lie down until the night he found the place.</p>
+      <blockquote><span class="he">אִם אֶתֵּן שְׁנַת לְעֵינָי, לְעַפְעַפַּי תְּנוּמָה, עַד אֶמְצָא מָקוֹם לַה׳, מִשְׁכָּנוֹת לַאֲבִיר יַעֲקֹב</span><cite><a href="https://www.sefaria.org/Psalms.132.4-5" target="_blank" rel="noopener">Psalms 132:4–5</a> · <a href="https://www.sefaria.org/Berakhot.3b" target="_blank" rel="noopener">Berakhot 3b</a></cite></blockquote>
+    </section>
+
+    <section class="step" data-step="return" data-caption="Mount Moriah is uprooted and comes about 15 km north to meet Jacob at Beit El.">
+      <span class="num">05</span>
+      <h2>Back south, and the mountain comes to meet him</h2>
+      <p>Before going on to Laban, Jacob turns back south to pray where his fathers prayed. He knows the area around the mountain but not its exact spot. When he reaches Beit El, the mountain comes to him.</p>
+      <blockquote><span class="he">אומר אני שנעקר הר המוריה ובא לכאן... שבא בית המקדש לקראתו עד בית אל</span><cite><a href="https://www.sefaria.org/Rashi_on_Genesis.28.17" target="_blank" rel="noopener">Rashi on Genesis 28:17</a> · <a href="https://www.sefaria.org/Chullin.91b" target="_blank" rel="noopener">Chullin 91b</a></cite></blockquote>
+      <p>The puzzle in the midrash is the scale. Why would God shorten a journey of some 800 km by only 15? Because the journey being shortened was the return from Ebla. The detour south was Jacob's own search for the place.</p>
+    </section>
+
+    <section class="step" data-step="haran" data-caption="From Beit El on to Haran, about 660 km in a straight line from Jerusalem.">
+      <span class="num">06</span>
+      <h2>On to Haran</h2>
+      <p>From Beit El Jacob continues north and east to Laban's house. There God appears to him again and names Himself by the place.</p>
+      <blockquote><span class="he">אָנֹכִי הָאֵ-ל בֵּית אֵל אֲשֶׁר מָשַׁחְתָּ שָּׁם מַצֵּבָה</span><cite><a href="https://www.sefaria.org/Genesis.31.13" target="_blank" rel="noopener">Genesis 31:13</a></cite></blockquote>
+    </section>
+
+    <div class="part">Part II · The ladder</div>
+
+    <section class="step" data-step="ladder" data-caption="Schematic, south to north. Apex above Jerusalem; one foot in Be'er Sheva, the other at Beit El.">
+      <span class="num">07</span>
+      <h2>A ladder with two legs</h2>
+      <blockquote><span class="he">הסולם הזה עומד בבאר שבע ואמצע שיפועו מגיע כנגד בית המקדש</span><cite><a href="https://www.sefaria.org/Rashi_on_Genesis.28.17" target="_blank" rel="noopener">Rashi on Genesis 28:17</a></cite></blockquote>
+      <p>The usual picture is a single slanted ladder, like a fire ladder, with its foot in Be'er Sheva and its head in the sky over Beit El. That leaves the midpoint meaningless, and Jerusalem is not halfway between them anyway. It is close to Beit El and far from Be'er Sheva.</p>
+      <p>Picture instead a household stepladder with two legs. Its "middle of the slope" is the apex, where the climb turns into the descent: the gate of heaven. The legs need not be equal, so the apex can stand over Jerusalem.</p>
+      <p>The angels of the Land of Israel climb from Be'er Sheva as Jacob leaves it, which is why the city's splendor departed with him. They enter heaven above Moriah. The angels of outside the Land come down the other leg to Beit El, Jacob's last point in the Land.</p>
+    </section>
+
+    <section class="step" data-step="body" data-caption="Jacob lies beneath the ladder: feet at Be'er Sheva, head at Beit El, heart under the gate of heaven.">
+      <span class="num">08</span>
+      <h2>Jerusalem at Jacob's heart</h2>
+      <p>Lay Jacob beneath the ladder, with the land folded under him. His feet are planted at Be'er Sheva. His head, and his thoughts, are at Beit El. The apex, the gate of heaven, stands over Jerusalem.</p>
+      <p>The author places Jacob's Beit El about 10 km north of today's. Measure it, and the gate of heaven falls over Jacob's heart.</p>
+      <div class="stats" id="stats">
+        <div class="stat"><b id="s-bsj">72 km</b><span>Be'er Sheva to the Temple Mount</span></div>
+        <div class="stat"><b id="s-jbe">28 km</b><span>Temple Mount to Jacob's Beit El</span></div>
+        <div class="stat"><b id="s-frac">28%</b><span>of the way down from the head: the heart</span></div>
+      </div>
+      <p style="color:var(--muted);font-size:15.5px">With today's Beit El (Beitin) instead, Jerusalem would fall about <span id="s-frac2">19%</span> of the way down, at the throat. Straight-line distances between approximate sites.</p>
+    </section>
+
+    <section class="step" data-step="kodesh" data-caption="The dream mapped onto the Holy of Holies.">
+      <span class="num">09</span>
+      <h2>The Holy of Holies</h2>
+      <p>The picture also matches the structure of the Holy of Holies, the permanent place where the Shekhinah is revealed.</p>
+      <table class="parallels">
+        <thead><tr><th>Jacob's dream</th><th>Holy of Holies</th></tr></thead>
+        <tbody>
+          <tr><td>The stone at his head<span class="he">האבן למראשותיו</span></td><td>The Foundation Stone<span class="he">אבן השתייה</span></td></tr>
+          <tr><td>Jacob, keeper of the covenant<span class="he">יעקב, המרכבה לשכינה</span></td><td>The Ark with the Tablets<span class="he">ארון הברית</span></td></tr>
+          <tr><td>Angels above and on either side<span class="he">מלאכי הסולם</span></td><td>The cherubim<span class="he">הכרובים</span></td></tr>
+          <tr><td>God standing over him, between the angels<span class="he">וה׳ נצב עליו</span></td><td>The Voice from between the cherubim<span class="he">מעל הכפורת</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="part">Part III · Shiloh</div>
+
+    <section class="step" data-step="twobeitel" data-caption="Two Beit Els: Abraham's at Beitin, and Jacob's further north, overlooking Shiloh.">
+      <span class="num">10</span>
+      <h2>Two Beit Els</h2>
+      <p>On the plain meaning of the verses, Jacob's house of God is at Beit El, not Jerusalem. The author suggests "Beit El" is a name that more than one place could carry.</p>
+      <p>Abraham camped between Beit El and Ai. That Beit El seems always to have borne the name, and is identified with the Arab village of Beitin, east of today's settlement.</p>
+      <p>Jacob gave the name to a place previously called <b>Luz</b>. That may be a different site, further north, in the hills overlooking Shiloh from the south. There is an identification there that may fit.</p>
+    </section>
+
+    <section class="step" data-step="shiloh" data-caption="Shiloh: the Ark of the Covenant and Pinchas, 'at Beit El'.">
+      <span class="num">11</span>
+      <h2>When Beit El meant Shiloh</h2>
+      <blockquote><span class="he">וַיָּבֹאוּ בֵית אֵל וַיִּבְכּוּ... וַיִּשְׁאֲלוּ בְנֵי יִשְׂרָאֵל בַּה׳, וְשָׁם אֲרוֹן בְּרִית הָאֱ-לֹהִים בַּיָּמִים הָהֵם, וּפִינְחָס בֶּן אֶלְעָזָר בֶּן אַהֲרֹן עֹמֵד לְפָנָיו</span><cite><a href="https://www.sefaria.org/Judges.20.26-28" target="_blank" rel="noopener">Judges 20:26–28</a></cite></blockquote>
+      <p>The commentators rightly explain that Israel gathered at Shiloh, since the Ark and Pinchas were there. This also explains why Joshua set the Mishkan at Shiloh, a town with no prior distinction in the text.</p>
+      <p>It may be the meaning of Jacob's obscure blessing to Judah. Rule stays with Judah until God rests His presence at Shiloh, the place Jacob knew from his dream. Once the Ark arrives, God leads Israel, not one tribe.</p>
+      <blockquote><span class="he">לֹא יָסוּר שֵׁבֶט מִיהוּדָה וּמְחֹקֵק מִבֵּין רַגְלָיו עַד כִּי יָבֹא שִׁילֹה</span><cite><a href="https://www.sefaria.org/Genesis.49.10" target="_blank" rel="noopener">Genesis 49:10</a></cite></blockquote>
+    </section>
+
+    <section class="step" data-step="ephraim" data-caption="Schematic tribal borders. Ephraim, the southern (right-hand) share of Joseph, holds Shiloh.">
+      <span class="num">12</span>
+      <h2>The right hand on Ephraim</h2>
+      <p>Jacob gave Shiloh to Joseph, his chosen son and Rachel's firstborn, whom he raised for priestly service as "the nazir among his brothers", the way Hannah would raise Samuel.</p>
+      <blockquote><span class="he">וַיִּשְׁלַח יִשְׂרָאֵל אֶת יְמִינוֹ וַיָּשֶׁת עַל רֹאשׁ אֶפְרַיִם וְהוּא הַצָּעִיר</span><cite><a href="https://www.sefaria.org/Genesis.48.14" target="_blank" rel="noopener">Genesis 48:14</a></cite></blockquote>
+      <p>The right hand points south. Ephraim would receive the southern part of Joseph's inheritance, the part that holds Shiloh. Rashi's own geography fits: Jerusalem on the border of Judah and Benjamin, Beit El on the border of Benjamin and Joseph.</p>
+    </section>
+
+    <section class="step" data-step="coda" data-caption="Jerusalem, on the border where Judah (Leah) and Benjamin (Rachel) meet.">
+      <span class="num">13</span>
+      <h2>Where Rachel and Leah meet</h2>
+      <p>Why did Jacob not name Jerusalem, greater than Shiloh, given to Judah and Benjamin? Perhaps this is what Chazal meant when they said Jacob sought to reveal the end and it was hidden from him. His prophecy reached as far as Shiloh and no further.</p>
+      <p>Perhaps that was the price of his unchecked preference for Joseph and Rachel. God chose both Rachel and Leah, who together built the house of Israel. And He chose Jerusalem, where Rachel and Leah are joined in Benjamin and Judah.</p>
+    </section>
+  </div>
+
+  <div class="figure" aria-label="Map and diagram that follow the story">
+    <div class="frame" id="frame" data-mode="map">
+      <svg id="map" role="img" aria-label="Map of the Land of Israel and the route north to Haran" preserveAspectRatio="xMidYMid meet"></svg>
+      <svg id="profile" role="img" aria-label="Diagram of a two-legged ladder over the land, from Be'er Sheva to Beit El" viewBox="0 0 800 560" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <div class="caption"><span class="tag" id="cap-tag">01</span><span id="cap-text"></span></div>
+  </div>
+</div>
+
+<footer>
+  <div class="closing">זאת ירושלים שיזכנו הקב״ה לראותה בבניינה ובתפארתה</div>
+  <div>Based on a Hebrew essay on Parashat Vayetze. The Ebla identification follows Rav Yoel Bin-Nun, as cited by the author.</div>
+  <div>Site locations are approximate; Jacob's Beit El is the author's proposal. Tribal borders and the ladder diagram are schematic. Distances are straight-line.</div>
+</footer>
+
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg";
+const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const D2R=Math.PI/180, CX=Math.cos(34*D2R);
+const P=(lat,lon)=>[(lon-35)*CX*111.32,(34-lat)*110.57];
+const el=(tag,attrs,parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;};
+
+/* ---------- geography (approximate) ---------- */
+const PL={
+  bs:{lat:31.252,lon:34.791,en:"Be'er Sheva",he:"באר שבע",dx:-8,dy:4,a:"end",key:1,steps:"intro fold flight sleepless ephraim coda"},
+  jer:{lat:31.778,lon:35.2354,en:"Jerusalem",he:"הר המוריה",dx:-9,dy:4,a:"end",key:1,steps:"intro fold flight sleepless return haran twobeitel shiloh ephraim coda"},
+  beitin:{lat:31.930,lon:35.258,en:{_:"Beit El",twobeitel:"Abraham's Beit El",shiloh:"Beitin",ephraim:"Beitin",coda:"Beitin"},he:"בית אל",dx:-9,dy:4,a:"end",steps:"intro fold return haran twobeitel shiloh ephraim coda"},
+  ai:{lat:31.917,lon:35.262,en:"Ai",he:"העי",dx:8,dy:10,a:"start",steps:"twobeitel"},
+  jbe:{lat:32.025,lon:35.270,en:"Jacob's Beit El?",he:"לוז",dx:-9,dy:4,a:"end",key:1,steps:"twobeitel shiloh ephraim coda"},
+  shiloh:{lat:32.055,lon:35.290,en:"Shiloh",he:"שילה",dx:9,dy:4,a:"start",key:1,steps:"twobeitel shiloh ephraim coda"},
+  ebla:{lat:35.798,lon:36.798,en:"Ebla",he:"בית מדרשם של שם ועבר",dx:10,dy:4,a:"start",key:1,steps:"flight sleepless return haran"},
+  haran:{lat:36.866,lon:39.031,en:"Haran",he:"חרן",dx:-10,dy:-8,a:"end",key:1,steps:"flight sleepless haran"},
+  damascus:{lat:33.513,lon:36.292,en:"Damascus",he:"",dx:9,dy:4,a:"start",steps:"flight sleepless haran"}
+};
+const COAST=[[30.0,32.3],[31.26,32.30],[31.13,33.80],[31.33,34.22],[31.50,34.45],[31.67,34.55],[31.80,34.63],[32.05,34.75],[32.33,34.85],[32.50,34.89],[32.70,34.94],[32.83,34.97],[32.82,35.05],[32.93,35.07],[33.09,35.10],[33.27,35.20],[33.56,35.37],[33.90,35.48],[34.12,35.64],[34.45,35.80],[34.89,35.88],[35.18,35.94],[35.52,35.77],[35.85,35.83],[36.08,35.93],[36.59,36.17],[36.84,36.20],[36.77,35.79],[36.57,35.37],[36.78,34.90],[36.80,34.63],[36.37,33.93],[36.02,32.80],[36.5,31.9],[39,31.9],[39,42],[30,42]];
+const CYPRUS=[[35.05,32.27],[35.18,32.80],[35.36,32.93],[35.33,33.45],[35.45,33.95],[35.70,34.58],[35.40,34.10],[35.00,34.08],[34.65,33.70],[34.56,33.05],[34.70,32.42]];
+const DEADSEA=[[31.77,35.46],[31.76,35.56],[31.55,35.60],[31.35,35.55],[31.18,35.49],[31.05,35.43],[31.12,35.38],[31.35,35.40],[31.55,35.43]];
+const KINNERET=[[32.89,35.55],[32.87,35.64],[32.75,35.65],[32.70,35.58],[32.78,35.52],[32.85,35.51]];
+const JORDAN=[[33.05,35.62],[32.89,35.59],[32.70,35.57],[32.50,35.57],[32.30,35.55],[32.00,35.52],[31.77,35.52]];
+const EUPHRATES=[[37.6,38.3],[37.30,38.00],[37.03,37.98],[36.82,38.01],[36.65,38.20],[36.40,38.30],[36.10,38.55],[35.95,38.80],[35.95,39.00],[35.70,39.50],[35.33,40.14]];
+const ORONTES=[[34.40,36.40],[34.75,36.70],[35.10,36.70],[35.45,36.40],[35.90,36.35],[36.15,36.25],[36.08,35.95]];
+const HILLS=[[31.32,34.95],[31.30,35.20],[31.55,35.33],[31.85,35.40],[32.20,35.42],[32.45,35.30],[32.48,35.05],[32.15,35.05],[31.80,35.00],[31.55,34.95]];
+const ERETZ=[[31.15,34.70],[31.25,34.40],[31.50,34.45],[31.80,34.63],[32.05,34.75],[32.50,34.89],[32.83,34.97],[32.93,35.07],[33.09,35.10],[33.25,35.22],[33.25,35.65],[32.90,35.61],[32.70,35.57],[32.00,35.52],[31.75,35.48],[31.30,35.38],[31.10,35.20]];
+
+const ROUTES={
+  r1:{pts:[[31.252,34.791],[31.53,35.08],[31.778,35.30],[32.25,35.33],[32.85,35.50],[33.55,35.95],[34.40,36.35],[35.20,36.62],[35.798,36.798]],steps:"flight sleepless return",dim:"return"},
+  r2:{pts:[[35.798,36.798],[35.05,36.90],[34.20,36.62],[33.40,36.10],[32.75,35.62],[32.30,35.38],[31.930,35.258]],steps:"return haran",alt:1,dim:"haran"},
+  r3:{pts:[[31.930,35.258],[32.55,35.80],[33.513,36.292],[34.73,36.71],[35.60,37.40],[36.30,38.20],[36.866,39.031]],steps:"haran"}
+};
+const VIEWS={
+  intro:{lat:[31.05,32.15],lon:[34.45,35.85]},
+  fold:{lat:[30.85,33.45],lon:[34.0,36.2]},
+  flight:{lat:[30.9,37.3],lon:[33.0,39.6]},
+  sleepless:{lat:[34.6,36.6],lon:[35.6,38.2]},
+  return:{lat:[31.62,32.12],lon:[34.95,35.6]},
+  haran:{lat:[30.9,37.3],lon:[33.0,39.6]},
+  twobeitel:{lat:[31.86,32.10],lon:[35.10,35.42]},
+  shiloh:{lat:[31.72,32.13],lon:[35.02,35.50]},
+  ephraim:{lat:[31.15,32.45],lon:[34.55,35.80]},
+  coda:{lat:[31.55,32.10],lon:[34.85,35.60]},
+  ladder:null, body:null, kodesh:null
+};
+const ORDER=["intro","fold","flight","sleepless","return","haran","ladder","body","kodesh","twobeitel","shiloh","ephraim","coda"];
+
+/* ---------- helpers ---------- */
+function poly(arr){return arr.map((p,i)=>{const [x,y]=P(p[0],p[1]);return (i?"L":"M")+x.toFixed(2)+","+y.toFixed(2);}).join("")+"Z";}
+function line(arr){return arr.map((p,i)=>{const [x,y]=P(p[0],p[1]);return (i?"L":"M")+x.toFixed(2)+","+y.toFixed(2);}).join("");}
+function smooth(arr){
+  const pts=arr.map(p=>P(p[0],p[1]));let d="M"+pts[0].join(",");
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    const c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+    d+="C"+c1.map(v=>v.toFixed(2)).join(",")+" "+c2.map(v=>v.toFixed(2)).join(",")+" "+p2.map(v=>v.toFixed(2)).join(",");
+  }return d;
+}
+function hav(a,b){const R=6371,la1=a.lat*D2R,la2=b.lat*D2R,dl=(b.lat-a.lat)*D2R,dn=(b.lon-a.lon)*D2R;
+  return 2*R*Math.asin(Math.sqrt(Math.sin(dl/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dn/2)**2));}
+
+/* ---------- build map ---------- */
+const map=document.getElementById("map");
+el("rect",{class:"sea",x:-3000,y:-3000,width:6000,height:6000},map);
+const grat=el("g",{},map);
+for(let la=30;la<=38;la++)el("path",{class:"graticule",d:line([[la,31],[la,42]])},grat);
+for(let lo=31;lo<=42;lo++)el("path",{class:"graticule",d:line([[29,lo],[39,lo]])},grat);
+el("path",{class:"land",d:poly(COAST)},map);
+el("path",{class:"land",d:poly(CYPRUS)},map);
+el("path",{class:"hills",d:smooth(HILLS.concat([HILLS[0]]))+"Z"},map);
+el("path",{class:"river",d:smooth(JORDAN)},map);
+el("path",{class:"river",d:smooth(EUPHRATES)},map);
+el("path",{class:"river",d:smooth(ORONTES)},map);
+el("path",{class:"lake",d:poly(DEADSEA)},map);
+el("path",{class:"lake",d:poly(KINNERET)},map);
+
+const waterLabels=[];
+function wlabel(lat,lon,txt,steps){const [x,y]=P(lat,lon);const t=el("text",{class:"water-label",x,y,"text-anchor":"middle"},map);t.textContent=txt;if(steps)t.setAttribute("data-steps",steps);waterLabels.push(t);}
+wlabel(33.1,33.6,"Mediterranean Sea","flight haran");
+wlabel(31.95,34.45,"Mediterranean","intro fold ephraim");
+wlabel(36.2,38.55,"Euphrates","flight sleepless haran");
+
+// Eretz fold polygon
+const bx=P(PL.beitin.lat,PL.beitin.lon);
+const eretz=el("path",{class:"eretz",d:poly(ERETZ),"data-steps":"fold"},map);
+
+// tribal borders (schematic)
+const tribes=el("g",{"data-steps":"ephraim coda"},map);
+[[31.783,"jb"],[31.955,"bj"],[32.17,"em"]].forEach(([la,id])=>{
+  const pts=[];for(let lo=34.62;lo<=35.56;lo+=0.047)pts.push([la+0.012*Math.sin(lo*40),lo]);
+  el("path",{class:"tribe",d:smooth(pts)},tribes);
+});
+const tribeLabels=[[31.55,34.98,"Judah"],[31.87,34.98,"Benjamin"],[32.08,34.98,"Ephraim"],[32.32,34.98,"Manasseh"]];
+tribeLabels.forEach(([la,lo,t])=>{const [x,y]=P(la,lo);const tx=el("text",{class:"tribe-lbl",x,y,"text-anchor":"middle"},tribes);tx.textContent=t;});
+
+// routes
+const routeEls=[];
+for(const id in ROUTES){const r=ROUTES[id];
+  const p=el("path",{class:"route"+(r.alt?" alt":""),d:smooth(r.pts),pathLength:1,"data-steps":r.steps},map);
+  p.dataset.dim=r.dim||"";routeEls.push(p);}
+
+// 15 km bracket between Jerusalem and Beit El
+const brk=el("g",{"data-steps":"return"},map);
+const [jx,jy]=P(PL.jer.lat,PL.jer.lon);
+el("path",{class:"bracket",d:`M${jx+3.2},${jy}L${bx[0]+3.2},${bx[1]}`},brk);
+const bnote=el("text",{class:"note",x:jx+4.5,y:(jy+bx[1])/2},brk);bnote.textContent="≈15–17 km";
+const brkPos={x:jx,y:(jy+bx[1])/2};
+
+// uncertainty ring for Jacob's Beit El
+const [ux,uy]=P(PL.jbe.lat,PL.jbe.lon);
+const ring=el("circle",{class:"uncertain",cx:ux,cy:uy,r:2.4,"data-steps":"twobeitel shiloh"},map);
+
+// moriah ghost
+const moriah=el("g",{"data-steps":"return"},map);
+const moriahHalo=el("circle",{class:"halo",cx:jx,cy:jy,r:2},moriah);
+const moriahTri=el("path",{class:"moriah",d:""},moriah);
+
+// notes
+const notes=[];
+function note(lat,lon,dx,dy,txt,steps,anchor){const [x,y]=P(lat,lon);const t=el("text",{class:"note","data-steps":steps,"text-anchor":anchor||"start"},map);t.textContent=txt;notes.push({t,x,y,dx,dy});}
+note(31.930,35.258,12,18,"Jeroboam's calf, 1 Kings 12","intro");
+note(31.778,35.2354,12,18,"the place of the Shekhinah","intro");
+note(35.798,36.798,12,22,"14 years, never lying down","sleepless");
+note(31.25,34.79,-8,22,"fled in haste","flight","end");
+note(32.055,35.290,12,22,"Mishkan · Ark · Pinchas","shiloh");
+note(31.778,35.2354,12,22,"Judah meets Benjamin","coda");
+note(36.866,39.031,-10,14,"Laban's house","haran","end");
+note(31.93,35.258,14,-12,"the mountain comes north","return");
+
+// places
+const placeEls={};
+for(const id in PL){const p=PL[id];const [x,y]=P(p.lat,p.lon);
+  const g=el("g",{"data-steps":p.steps},map);
+  const halo=p.key?el("circle",{class:"halo",cx:x,cy:y},g):null;
+  const dot=el("circle",{class:"dot"+(p.key?" key":""),cx:x,cy:y},g);
+  const t=el("text",{class:"lbl","text-anchor":p.a},g);
+  const tEn=el("tspan",{},t);const tHe=el("tspan",{class:"he",dx:"0.35em"},t);
+  tHe.textContent=p.he;
+  placeEls[id]={g,halo,dot,t,tEn,x,y,p};
+}
+
+/* ---------- view animation ---------- */
+let vb=null,from=null,to=null,t0=0,dur=1300,k=1;
+function fitAspect(b){const w=map.clientWidth||600,h=map.clientHeight||600;let [x,y,W,H]=b;const cx=x+W/2,cy=y+H/2;
+  if(W/H<w/h)W=H*w/h;else H=W*h/w;return [cx-W/2,cy-H/2,W,H];}
+function boundsVB(v){const [x1,y1]=P(v.lat[1],v.lon[0]);const [x2,y2]=P(v.lat[0],v.lon[1]);return fitAspect([x1,y1,x2-x1,y2-y1]);}
+function goView(name,instant){const v=VIEWS[name];if(!v)return;const target=boundsVB(v);
+  if(!vb||instant||reduce){vb=target;from=to=null;applyVB();return;}
+  from=vb.slice();to=target;t0=performance.now();}
+function applyVB(){map.setAttribute("viewBox",vb.map(n=>n.toFixed(3)).join(" "));
+  k=vb[2]/(map.clientWidth||600);map.style.setProperty("--k",k);
+  for(const id in placeEls){const o=placeEls[id];const lblStep=typeof o.p.en==="object"?(o.p.en[step]||o.p.en._):o.p.en;
+    if(o.tEn.textContent!==lblStep)o.tEn.textContent=lblStep;
+    o.dot.setAttribute("r",(o.p.key?4.2:3.2)*k);if(o.halo)o.halo.setAttribute("r",11*k);
+    o.t.setAttribute("x",o.x+o.p.dx*k);o.t.setAttribute("y",o.y+o.p.dy*k);}
+  notes.forEach(n=>{n.t.setAttribute("x",n.x+n.dx*k);n.t.setAttribute("y",n.y+n.dy*k);});
+  bnote.setAttribute("x",brkPos.x+8*k);bnote.setAttribute("y",brkPos.y);
+  ring.setAttribute("r",Math.max(2.6,16*k));
+}
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+
+/* ---------- profile (ladder) ---------- */
+const prof=document.getElementById("profile");
+const dBSJ=hav(PL.bs,PL.jer),dJJB=hav(PL.jer,PL.jbe),dJB=hav(PL.jer,PL.beitin);
+const frac=dJJB/(dJJB+dBSJ),frac2=dJB/(dJB+dBSJ);
+document.getElementById("s-bsj").textContent=Math.round(dBSJ)+" km";
+document.getElementById("s-jbe").textContent=Math.round(dJJB)+" km";
+document.getElementById("s-frac").textContent=Math.round(frac*100)+"%";
+document.getElementById("s-frac2").textContent=Math.round(frac2*100)+"%";
+
+const S=90,N=730,G=430;const JX=N-(N-S)*frac;const AX=JX,AY=92;
+const defs=el("defs",{},prof);
+const rg=el("radialGradient",{id:"gate"},defs);el("stop",{offset:"0","stop-color":"#ffe7b0","stop-opacity":".95"},rg);el("stop",{offset:".35","stop-color":"#e9b65a","stop-opacity":".45"},rg);el("stop",{offset:"1","stop-color":"#e9b65a","stop-opacity":"0"},rg);
+const ag=el("radialGradient",{id:"ang"},defs);el("stop",{offset:"0","stop-color":"#fff8e6","stop-opacity":"1"},ag);el("stop",{offset:"1","stop-color":"#fff8e6","stop-opacity":"0"},ag);
+// stars
+for(let i=0;i<90;i++){const x=Math.random()*800,y=Math.random()*360;el("circle",{cx:x,cy:y,r:Math.random()*1.1+.2,fill:"#dfe6ff",opacity:(Math.random()*.6+.15).toFixed(2)},prof);}
+el("circle",{cx:AX,cy:AY,r:120,fill:"url(#gate)"},prof);
+const gateLbl=el("text",{x:AX,y:AY-34,"text-anchor":"middle",class:"plabel"},prof);gateLbl.textContent="Gate of heaven";
+const gateHe=el("text",{x:AX,y:AY-16,"text-anchor":"middle",class:"plabel-he"},prof);gateHe.textContent="שער השמים · אמצע שיפועו";
+// terrain silhouette (schematic)
+el("path",{class:"terrain",d:`M40,${G} L${S},${G-4} C170,${G-12} 220,${G-36} 290,${G-40} C360,${G-44} 400,${G-26} 450,${G-30} C${JX-40},${G-36} ${JX-10},${G-40} ${JX},${G-38} C${JX+60},${G-34} 640,${G-46} ${N},${G-48} L770,${G-44} L770,${G+40} L40,${G+40}Z`},prof);
+el("line",{class:"ground",x1:40,y1:G,x2:770,y2:G},prof);
+// ladder legs
+function leg(fx,fy,ax,ay,parent){const dx=ax-fx,dy=ay-fy,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,nx=-uy*7,ny=ux*7;
+  el("line",{class:"rail",x1:fx+nx,y1:fy+ny,x2:ax+nx,y2:ay+ny},parent);el("line",{class:"rail",x1:fx-nx,y1:fy-ny,x2:ax-nx,y2:ay-ny},parent);
+  for(let s=22;s<L-6;s+=26){const px=fx+ux*s,py=fy+uy*s;el("line",{class:"rung",x1:px+nx,y1:py+ny,x2:px-nx,y2:py-ny},parent);}}
+const ladderG=el("g",{},prof);leg(S,G,AX,AY,ladderG);leg(N,G,AX,AY,ladderG);
+// place labels
+function plabel(x,en,he){const a=el("text",{x,y:G+26,"text-anchor":"middle",class:"plabel"},prof);a.textContent=en;const b=el("text",{x,y:G+46,"text-anchor":"middle",class:"plabel-he"},prof);b.textContent=he;}
+plabel(S,"Be'er Sheva","באר שבע");plabel(JX,"Jerusalem","הר המוריה");plabel(N,"Beit El","בית אל");
+el("line",{x1:JX,y1:G-2,x2:JX,y2:G+8,stroke:"#e9b65a","stroke-width":1.5},prof);
+const dirTxt=el("text",{x:400,y:548,"text-anchor":"middle",fill:"#6d7699","font-size":"11.5","letter-spacing":"2"},prof);dirTxt.textContent="SOUTH  ←  SCHEMATIC  →  NORTH";
+const angelUp=el("text",{x:(S+AX)/2-46,y:(G+AY)/2+6,"text-anchor":"end",class:"anno"},prof);angelUp.textContent="angels of the Land ascend";
+const angelDn=el("text",{x:(N+AX)/2-16,y:(G+AY)/2-8,"text-anchor":"end",class:"anno"},prof);el("tspan",{},angelDn).textContent="angels from abroad";const _t2=el("tspan",{x:(N+AX)/2-16,dy:"1.2em"},angelDn);_t2.textContent="descend";
+// Jacob
+const jacobG=el("g",{},prof);
+el("path",{class:"jacob",d:`M${S+14},${G-3} C${S+80},${G-12} ${N-200},${G-14} ${N-40},${G-12} L${N-26},${G-10} L${N-26},${G-1} L${S+14},${G-1}Z`,opacity:.9},jacobG);
+el("circle",{class:"jacob",cx:N-16,cy:G-9,r:9},jacobG);
+el("path",{d:`M${N+2},${G} l4,-14 l14,-2 l6,16Z`,fill:"#7d7f93"},jacobG);
+const heart=el("circle",{class:"heart",cx:JX,cy:G-9,r:5},jacobG);
+el("line",{class:"lead",x1:JX,y1:G-16,x2:AX,y2:AY+40},jacobG);
+const hl=el("text",{x:JX+12,y:G-60,class:"anno"},jacobG);hl.textContent="his heart";
+const headL=el("text",{x:N-10,y:G-30,class:"anno","text-anchor":"middle"},jacobG);headL.textContent="head";
+const feetL=el("text",{x:S+20,y:G-18,class:"anno","text-anchor":"middle"},jacobG);feetL.textContent="feet";
+// measurement brackets under labels
+const measG=el("g",{},prof);
+const my=G+70;
+el("path",{class:"lead",d:`M${S},${my-6}V${my}H${JX-3}V${my-6}`},measG);
+el("path",{class:"lead",d:`M${JX+3},${my-6}V${my}H${N}V${my-6}`},measG);
+const m1=el("text",{x:(S+JX)/2,y:my+18,"text-anchor":"middle",class:"anno"},measG);m1.textContent="≈"+Math.round(dBSJ)+" km";
+const m2=el("text",{x:(JX+N)/2,y:my+18,"text-anchor":"middle",class:"anno"},measG);m2.textContent="≈"+Math.round(dJJB)+" km";
+// kodesh annotations
+const kodG=el("g",{},prof);
+function kanno(x1,y1,x2,y2,txt,anchor){el("line",{class:"lead",x1,y1,x2,y2},kodG);const t=el("text",{x:x2+(anchor==="end"?-6:6),y:y2+4,"text-anchor":anchor||"start",class:"anno"},kodG);t.textContent=txt;}
+kanno(N+14,G-8,N-10,G-100,"stone → Foundation Stone","end");
+kanno(N-140,G-12,N-150,G-150,"Jacob → the Ark","end");
+kanno((S+AX)/2+40,(G+AY)/2-30,(S+AX)/2-10,(G+AY)/2-110,"angels → cherubim","end");
+kanno(AX+24,AY-6,AX+70,AY-44,"Voice above the kapporet","start");
+// angels
+const angels=[];for(let i=0;i<5;i++){angels.push({up:true,o:i/5,e:el("circle",{r:6,fill:"url(#ang)"},prof)});angels.push({up:false,o:i/5+.1,e:el("circle",{r:6,fill:"url(#ang)"},prof)});}
+function placeAngels(t){angels.forEach(a=>{let s=((t/9000)+a.o)%1;let x,y;
+  if(a.up){x=S+(AX-S)*s;y=G+(AY-G)*s;}else{x=AX+(N-AX)*s;y=AY+(G-AY)*s;}
+  const off=a.up?-14:14;a.e.setAttribute("cx",x+off*0.6);a.e.setAttribute("cy",y-10);
+  a.e.setAttribute("opacity",(Math.sin(s*Math.PI)*.9+.1).toFixed(2));});}
+placeAngels(0);
+
+function profileState(s){
+  const show=(g,on)=>g.setAttribute("class",on?"":"p-dim");
+  jacobG.style.opacity=(s==="ladder")?0.0:1;jacobG.style.transition="opacity .8s";
+  measG.style.opacity=s==="body"?1:0;measG.style.transition="opacity .8s";
+  kodG.style.opacity=s==="kodesh"?1:0;kodG.style.transition="opacity .8s";
+  angelUp.style.opacity=angelDn.style.opacity=s==="kodesh"?0:1;
+  hl.style.opacity=s==="body"?1:0;headL.style.opacity=feetL.style.opacity=s==="body"?1:0;
+}
+
+/* ---------- step control ---------- */
+let step=null,stepStart=0;
+const frame=document.getElementById("frame");
+const capTag=document.getElementById("cap-tag"),capText=document.getElementById("cap-text");
+const stepEls=[...document.querySelectorAll(".step")];
+function setStep(s){if(s===step&&vb)return;step=s;stepStart=performance.now();
+  stepEls.forEach(e=>e.classList.toggle("active",e.dataset.step===s));
+  const sec=stepEls.find(e=>e.dataset.step===s);
+  capTag.textContent=sec.querySelector(".num").textContent;capText.textContent=sec.dataset.caption||"";
+  const isProf=!VIEWS[s];frame.dataset.mode=isProf?"profile":"map";
+  if(isProf)profileState(s);else goView(s);
+  map.querySelectorAll("[data-steps]").forEach(e=>{const on=e.getAttribute("data-steps").split(" ").includes(s);e.classList.toggle("on",on);
+    if(e.classList.contains("route"))e.classList.toggle("dim",e.dataset.dim===s);});
+  if(vb&&!from)applyVB();
+}
+const io=new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting)setStep(en.target.dataset.step);});},{rootMargin:"-45% 0px -45% 0px"});
+stepEls.forEach(e=>io.observe(e));
+
+/* ---------- animation loop ---------- */
+function frameLoop(now){
+  if(from&&to){let t=Math.min(1,(now-t0)/dur);const e=ease(t);
+    const fc=[from[0]+from[2]/2,from[1]+from[3]/2],tc=[to[0]+to[2]/2,to[1]+to[3]/2];
+    const W=Math.exp(Math.log(from[2])+(Math.log(to[2])-Math.log(from[2]))*e),H=W*to[3]/to[2];
+    const cx=fc[0]+(tc[0]-fc[0])*e,cy=fc[1]+(tc[1]-fc[1])*e;vb=[cx-W/2,cy-H/2,W,H];applyVB();if(t>=1){vb=to;from=to=null;applyVB();}}
+  const el_=now-stepStart;
+  // fold
+  if(step==="fold"){const c=reduce?0.5:(1-Math.cos(Math.min(1,el_/2600)*Math.PI))/2;const ph=reduce?0:Math.max(0,(el_-2600)%5200)/5200;
+    let sc=el_<2600?1-0.85*c:0.15+0.85*(ph<.5?ease(ph*2):1-ease((ph-.5)*2))*0+0;
+    if(el_>=2600&&!reduce){const cyc=((el_-2600)%6000)/6000;sc=cyc<.35?0.15+0.85*ease(cyc/.35):cyc<.55?1:1-0.85*ease((cyc-.55)/.45);}
+    if(reduce)sc=0.5;
+    eretz.setAttribute("transform",`translate(${bx[0]},${bx[1]}) scale(${sc.toFixed(4)}) translate(${-bx[0]},${-bx[1]})`);}
+  // moriah slides from Jerusalem to Beit El
+  if(step==="return"){let t=reduce?1:Math.min(1,Math.max(0,(el_-1600)/2200));t=ease(t);
+    const x=jx+(bx[0]-jx)*t,y=jy+(bx[1]-jy)*t;const s=7*k;
+    moriahTri.setAttribute("d",`M${x-s},${y+s*.55}L${x},${y-s*.9}L${x+s},${y+s*.55}Z`);
+    moriahHalo.setAttribute("cx",x);moriahHalo.setAttribute("cy",y);moriahHalo.setAttribute("r",16*k);}
+  if(frame.dataset.mode==="profile"&&!reduce){placeAngels(now);heart.setAttribute("r",(5+Math.sin(now/380)*1.2).toFixed(2));}
+  requestAnimationFrame(frameLoop);
+}
+goView("intro",true);setStep("intro");applyVB();
+requestAnimationFrame(frameLoop);
+window.addEventListener("resize",()=>{const v=VIEWS[step]||VIEWS.intro;vb=boundsVB(v);from=to=null;applyVB();});
+
+/* ---------- background stars ---------- */
+const cv=document.getElementById("stars"),cx2=cv.getContext("2d");
+function drawStars(){const dpr=window.devicePixelRatio||1;cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;cx2.scale(dpr,dpr);
+  for(let i=0;i<160;i++){cx2.fillStyle=`rgba(220,228,255,${(Math.random()*.5+.08).toFixed(2)})`;cx2.beginPath();cx2.arc(Math.random()*innerWidth,Math.random()*innerHeight,Math.random()*1+.2,0,6.283);cx2.fill();}}
+drawStars();window.addEventListener("resize",drawStars);
+})();
+</script>
+</body>
+</html>
